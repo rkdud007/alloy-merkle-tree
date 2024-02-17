@@ -51,10 +51,6 @@ impl MerkleTree {
             return;
         }
 
-        if self.leaves.len() % 2 != 0 {
-            panic!("The number of leaves must be a even number")
-        }
-
         self.depth = 1;
         self.layers.push(self.leaves.clone());
 
@@ -125,15 +121,15 @@ impl MerkleTree {
 #[test]
 fn test_tree() {
     let mut tree = MerkleTree::new();
-    // Should even number of leaves
-    let num_leaves = 10000;
-    for _ in 0..num_leaves {
-        tree.insert(B256::from(Uint::from(0)));
+    // Should be 2 ^ N leaves
+    let num_leaves = 16;
+    for i in 0..num_leaves {
+        tree.insert(B256::from(Uint::from(i)));
     }
     tree.finish();
 
-    for _ in 0..num_leaves {
-        let proof = tree.create_proof(&B256::from(Uint::from(0))).unwrap();
+    for i in 0..num_leaves {
+        let proof = tree.create_proof(&B256::from(Uint::from(i))).unwrap();
         assert!(MerkleTree::verify_proof(&proof));
     }
 }
