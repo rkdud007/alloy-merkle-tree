@@ -12,7 +12,10 @@ version = "0.4.0"
 edition = "2021"
 
 [dependencies]
-alloy-primitives = { version = "0.6.2", default-features = false }
-alloy-dyn-abi = { version = "0.6.2", default-features = false }
 hashbrown = "0.14.3"
 anyhow = "1.0"
+alloy-primitives = { git = "https://github.com/succinctlabs/alloy-core-private.git", default-features = false }
+tiny-keccak = { version = "2.0", features = ["keccak"] }
+
+[patch.crates-io]
+tiny-keccak = { git = "https://github.com/succinctlabs/tiny-keccak-private.git", branch = "chris/test" }
