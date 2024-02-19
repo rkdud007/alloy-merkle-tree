@@ -1,4 +1,5 @@
 use alloy_primitives::{Keccak256, B256};
+use alloc::vec::Vec;
 
 #[derive(Debug)]
 pub struct MerkleProof {
@@ -118,21 +119,24 @@ impl MerkleTree {
     }
 }
 
-#[test]
+#[cfg(test)]
+mod test {
+    use alloy_primitives::{B256, U256};
+    use crate::tree::MerkleTree;
 
-fn test_tree() {
-    use alloy_primitives::Uint;
+    #[test]
+    fn test_tree() {
+        let mut tree = MerkleTree::new();
+        // Should be 2 ^ N leaves
+        let num_leaves = 16;
+        for i in 0..num_leaves {
+            tree.insert(B256::from(U256::from(i)));
+        }
+        tree.finish();
 
-    let mut tree = MerkleTree::new();
-    // Should be 2 ^ N leaves
-    let num_leaves = 16;
-    for i in 0..num_leaves {
-        tree.insert(B256::from(Uint::from(i)));
-    }
-    tree.finish();
-
-    for i in 0..num_leaves {
-        let proof = tree.create_proof(&B256::from(Uint::from(i))).unwrap();
-        assert!(MerkleTree::verify_proof(&proof));
+        for i in 0..num_leaves {
+            let proof = tree.create_proof(&B256::from(U256::from(i))).unwrap();
+            assert!(MerkleTree::verify_proof(&proof));
+        }
     }
 }
