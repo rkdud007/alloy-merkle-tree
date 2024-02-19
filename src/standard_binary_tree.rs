@@ -195,7 +195,7 @@ fn hash_pair(left: B256, right: B256) -> B256 {
 
 #[cfg(test)]
 mod test {
-    use crate::complete_binary_tree::StandardMerkleTree;
+    use crate::standard_binary_tree::StandardMerkleTree;
     use alloc::vec::Vec;
     use alloy_primitives::{B256, U256};
 
