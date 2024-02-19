@@ -1,4 +1,4 @@
-use alloy_primitives::{Keccak256, Uint, B256};
+use alloy_primitives::{Keccak256, B256};
 
 #[derive(Debug)]
 pub struct MerkleProof {
@@ -119,7 +119,10 @@ impl MerkleTree {
 }
 
 #[test]
+
 fn test_tree() {
+    use alloy_primitives::Uint;
+
     let mut tree = MerkleTree::new();
     // Should be 2 ^ N leaves
     let num_leaves = 16;
