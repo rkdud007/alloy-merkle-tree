@@ -1,5 +1,8 @@
 [package]
 name = "alloy-merkle-tree"
+license = "Apache-2.0"
+license-file = "LICENSE"
+repository = "https://github.com/rkdud007/alloy-merkle-tree"
 version = "0.1.0"
 edition = "2021"
 
