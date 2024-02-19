@@ -1,6 +1,8 @@
 //! This module contains the [StandardMerkleTree], an implementation of the standard Merkle Tree data structure
 //! Checkout [StandardMerkleTree](https://github.com/OpenZeppelin/merkle-tree) for more details.
 
+use crate::alloc::string::ToString;
+use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
 use alloy_dyn_abi::DynSolValue;
@@ -25,7 +27,7 @@ pub struct MerkleProof {
 #[derive(Debug)]
 pub struct StandardMerkleTree {
     tree: Vec<B256>,
-    tree_values: HashMap<B256, usize>,
+    tree_values: HashMap<String, usize>,
 }
 
 impl Default for StandardMerkleTree {
@@ -35,19 +37,19 @@ impl Default for StandardMerkleTree {
 }
 
 impl StandardMerkleTree {
-    pub fn new(tree: Vec<B256>, values: Vec<(B256, usize)>) -> Self {
+    pub fn new(tree: Vec<B256>, values: Vec<(String, usize)>) -> Self {
         let mut tree_values = HashMap::new();
         for value in values.iter() {
-            tree_values.insert(value.0, value.1);
+            tree_values.insert(value.0.clone(), value.1);
         }
         Self { tree, tree_values }
     }
 
-    pub fn of(values: Vec<B256>) -> Self {
-        let hashed_values: Vec<(B256, usize, B256)> = values
+    pub fn of(values: Vec<String>) -> Self {
+        let hashed_values: Vec<(&String, usize, B256)> = values
             .iter()
             .enumerate()
-            .map(|(i, value)| (*value, i, standard_leaf_hash(value)))
+            .map(|(i, value)| (value, i, standard_leaf_hash(value.to_string())))
             .collect();
 
         let hashed_values_hash = hashed_values
@@ -57,10 +59,10 @@ impl StandardMerkleTree {
 
         let tree = make_merkle_tree(hashed_values_hash);
 
-        let mut indexed_values: Vec<(B256, usize)> = values
+        let mut indexed_values: Vec<(String, usize)> = values
             .iter()
             .enumerate()
-            .map(|(_, value)| (*value, 0))
+            .map(|(_, value)| (value.to_string(), 0))
             .collect();
 
         for (leaf_index, (_, value_index, _)) in hashed_values.iter().enumerate() {
@@ -74,7 +76,7 @@ impl StandardMerkleTree {
         self.tree[0]
     }
 
-    pub fn get_proof(&self, value: &B256) -> Vec<B256> {
+    pub fn get_proof(&self, value: &String) -> Vec<B256> {
         let tree_index = self
             .tree_values
             .get(value)
@@ -83,11 +85,11 @@ impl StandardMerkleTree {
         make_proof(self.tree.clone(), *tree_index)
     }
 
-    fn get_leaf_hash(&self, leaf: B256) -> B256 {
-        standard_leaf_hash(&leaf)
+    fn get_leaf_hash(&self, leaf: String) -> B256 {
+        standard_leaf_hash(leaf)
     }
 
-    pub fn verify_proof(&self, leaf: B256, proof: Vec<B256>) -> bool {
+    pub fn verify_proof(&self, leaf: String, proof: Vec<B256>) -> bool {
         let leaf_hash = self.get_leaf_hash(leaf);
 
         let implied_root = process_proof(leaf_hash, proof);
@@ -96,8 +98,8 @@ impl StandardMerkleTree {
     }
 }
 
-fn standard_leaf_hash(value: &B256) -> B256 {
-    let abi_value: DynSolValue = DynSolValue::FixedBytes(*value, 32);
+fn standard_leaf_hash(value: String) -> B256 {
+    let abi_value: DynSolValue = DynSolValue::String(value);
     let encoded = abi_value.abi_encode();
     keccak256(keccak256(encoded))
 }
@@ -112,8 +114,10 @@ fn right_child_index(index: usize) -> usize {
 
 fn sibling_index(index: usize) -> usize {
     if index == 0 {
-        panic!("Root has no siblings"); // Panicking since throwError is not available in Rust
-    } else if index % 2 == 0 {
+        panic!("Root has no siblings");
+    }
+
+    if index % 2 == 0 {
         index - 1
     } else {
         index + 1
@@ -195,23 +199,22 @@ fn hash_pair(left: B256, right: B256) -> B256 {
 
 #[cfg(test)]
 mod test {
+    use crate::alloc::string::ToString;
     use crate::standard_binary_tree::StandardMerkleTree;
     use alloc::vec::Vec;
-    use alloy_primitives::{B256, U256};
 
     #[test]
     fn test_tree() {
-        // Should be 2 ^ N leaves
-        let num_leaves = 4;
+        let num_leaves = 1000;
         let mut leaves = Vec::new();
         for i in 0..num_leaves {
-            leaves.push(B256::from(U256::from(i)));
+            leaves.push(i.to_string());
         }
         let tree = StandardMerkleTree::of(leaves.clone());
 
         for leaf in leaves.iter() {
             let proof = tree.get_proof(leaf);
-            let bool = tree.verify_proof(*leaf, proof);
+            let bool = tree.verify_proof(leaf.to_string(), proof);
             assert!(bool);
         }
     }

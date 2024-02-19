@@ -8,7 +8,7 @@ repository = "https://github.com/rkdud007/alloy-merkle-tree"
 keywords = ["merkle", "tree", "merkle-tree"]
 categories = ["cryptography", "data-structures", "blockchain"]
 exclude = [".github"]
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 
 [dependencies]
