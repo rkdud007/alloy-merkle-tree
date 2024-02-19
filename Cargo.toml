@@ -1,8 +1,12 @@
 [package]
 name = "alloy-merkle-tree"
+description = "Minimal Merkle Tree implementation"
 license = "Apache-2.0"
+readme = "README.md"
 license-file = "LICENSE"
 repository = "https://github.com/rkdud007/alloy-merkle-tree"
+keywords = ["merkle", "tree", "merkle-tree"]
+categories = ["cryptography", "data-structures", "blockchain"]
 version = "0.1.0"
 edition = "2021"
 
