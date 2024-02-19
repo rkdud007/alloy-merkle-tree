@@ -2,6 +2,7 @@
 //! used in the [ETH2 Deposit Contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa).
 
 use alloy_primitives::{keccak256, B256};
+use alloc::{vec, vec::Vec};
 
 /// The error type for the [IncrementalMerkleTree].
 #[derive(Debug)]
