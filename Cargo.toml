@@ -14,6 +14,7 @@ edition = "2021"
 [dependencies]
 hashbrown = "0.14.3"
 anyhow = "1.0"
+alloy-dyn-abi = "0.6.2"
 alloy-primitives = { git = "https://github.com/succinctlabs/alloy-core-private.git", default-features = false }
 tiny-keccak = { version = "2.0", features = ["keccak"] }
 
