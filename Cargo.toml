@@ -7,7 +7,8 @@ license-file = "LICENSE"
 repository = "https://github.com/rkdud007/alloy-merkle-tree"
 keywords = ["merkle", "tree", "merkle-tree"]
 categories = ["cryptography", "data-structures", "blockchain"]
-version = "0.1.1"
+exclude = [".github"]
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]

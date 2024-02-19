@@ -1,8 +1,8 @@
 //! This module contains the [IncrementalMerkleTree], an implementation of the incremental Merkle Tree data structure
 //! used in the [ETH2 Deposit Contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa).
 
-use alloy_primitives::{keccak256, B256};
 use alloc::{vec, vec::Vec};
+use alloy_primitives::{keccak256, B256};
 
 /// The error type for the [IncrementalMerkleTree].
 #[derive(Debug)]
@@ -220,11 +220,11 @@ mod test {
             let mut hash_buf = [0u8; 64];
             hash_buf[..32].copy_from_slice([1u8; 32].as_slice());
             hash_buf[32..].copy_from_slice([0u8; 32].as_slice());
-            let left = keccak256(&hash_buf);
+            let left = keccak256(hash_buf);
             let right = tree.zero_hashes[1];
             hash_buf[..32].copy_from_slice(left.as_slice());
             hash_buf[32..].copy_from_slice(right.as_slice());
-            keccak256(&hash_buf)
+            keccak256(hash_buf)
         };
 
         assert_eq!(tree.size, 1);
@@ -251,10 +251,10 @@ mod test {
     #[test]
     fn test_gen_proof() {
         let mut tree = IncrementalMerkleTree::<8>::new();
-        for i in 0..1 << 8 - 1 {
+        for i in 0..1 << (8 - 1) {
             tree.append([i as u8; 32].into()).unwrap();
         }
-        for i in 0..1 << 8 - 1 {
+        for i in 0..1 << (8 - 1) {
             let leaf = [i as u8; 32].into();
             let proof = tree.proof_at_index(i).unwrap();
             assert!(tree.verify_proof(leaf, i, &proof));

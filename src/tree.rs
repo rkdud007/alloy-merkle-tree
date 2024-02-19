@@ -1,5 +1,5 @@
-use alloy_primitives::{Keccak256, B256};
 use alloc::vec::Vec;
+use alloy_primitives::{Keccak256, B256};
 
 #[derive(Debug)]
 pub struct MerkleProof {
@@ -121,8 +121,8 @@ impl MerkleTree {
 
 #[cfg(test)]
 mod test {
-    use alloy_primitives::{B256, U256};
     use crate::tree::MerkleTree;
+    use alloy_primitives::{B256, U256};
 
     #[test]
     fn test_tree() {
