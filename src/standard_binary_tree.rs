@@ -37,19 +37,24 @@ impl Default for StandardMerkleTree {
 }
 
 impl StandardMerkleTree {
-    pub fn new(tree: Vec<B256>, values: Vec<(String, usize)>) -> Self {
+    pub fn new(tree: Vec<B256>, values: Vec<(&DynSolValue, usize)>) -> Self {
         let mut tree_values = HashMap::new();
         for value in values.iter() {
-            tree_values.insert(value.0.clone(), value.1);
+            let tree_key = match &value.0 {
+                DynSolValue::String(inner_value) => inner_value.clone(),
+                DynSolValue::FixedBytes(inner_value, _) => inner_value.to_string(),
+                _ => panic!("Not supported value type for leaf"),
+            };
+            tree_values.insert(tree_key, value.1);
         }
         Self { tree, tree_values }
     }
 
-    pub fn of(values: Vec<String>) -> Self {
-        let hashed_values: Vec<(&String, usize, B256)> = values
+    pub fn of(values: Vec<DynSolValue>) -> Self {
+        let hashed_values: Vec<(&DynSolValue, usize, B256)> = values
             .iter()
             .enumerate()
-            .map(|(i, value)| (value, i, standard_leaf_hash(value.to_string())))
+            .map(|(i, value)| (value, i, standard_leaf_hash(value.clone())))
             .collect();
 
         let hashed_values_hash = hashed_values
@@ -59,10 +64,10 @@ impl StandardMerkleTree {
 
         let tree = make_merkle_tree(hashed_values_hash);
 
-        let mut indexed_values: Vec<(String, usize)> = values
+        let mut indexed_values: Vec<(&DynSolValue, usize)> = values
             .iter()
             .enumerate()
-            .map(|(_, value)| (value.to_string(), 0))
+            .map(|(_, value)| (value, 0))
             .collect();
 
         for (leaf_index, (_, value_index, _)) in hashed_values.iter().enumerate() {
@@ -76,20 +81,26 @@ impl StandardMerkleTree {
         self.tree[0]
     }
 
-    pub fn get_proof(&self, value: &String) -> Vec<B256> {
+    pub fn get_proof(&self, value: &DynSolValue) -> Vec<B256> {
+        let tree_key = match value {
+            DynSolValue::String(inner_value) => inner_value.clone(),
+            DynSolValue::FixedBytes(inner_value, _) => inner_value.to_string(),
+            _ => panic!("Not supported value type for leaf"),
+        };
+
         let tree_index = self
             .tree_values
-            .get(value)
+            .get(&tree_key)
             .ok_or(MerkleTreeError::LeafNotFound)
             .unwrap();
         make_proof(self.tree.clone(), *tree_index)
     }
 
-    fn get_leaf_hash(&self, leaf: String) -> B256 {
+    fn get_leaf_hash(&self, leaf: DynSolValue) -> B256 {
         standard_leaf_hash(leaf)
     }
 
-    pub fn verify_proof(&self, leaf: String, proof: Vec<B256>) -> bool {
+    pub fn verify_proof(&self, leaf: DynSolValue, proof: Vec<B256>) -> bool {
         let leaf_hash = self.get_leaf_hash(leaf);
 
         let implied_root = process_proof(leaf_hash, proof);
@@ -98,9 +109,12 @@ impl StandardMerkleTree {
     }
 }
 
-fn standard_leaf_hash(value: String) -> B256 {
-    let abi_value: DynSolValue = DynSolValue::String(value);
-    let encoded = abi_value.abi_encode();
+fn standard_leaf_hash(value: DynSolValue) -> B256 {
+    let encoded = match value {
+        DynSolValue::String(inner_value) => inner_value.as_bytes().to_vec(),
+        DynSolValue::FixedBytes(inner_value, _) => inner_value.to_vec(),
+        _ => panic!("Not supported value type for leaf"),
+    };
     keccak256(keccak256(encoded))
 }
 
@@ -202,19 +216,44 @@ mod test {
     use crate::alloc::string::ToString;
     use crate::standard_binary_tree::StandardMerkleTree;
     use alloc::vec::Vec;
+    use alloy_dyn_abi::DynSolValue;
+    use alloy_primitives::{hex::FromHex, FixedBytes};
 
     #[test]
-    fn test_tree() {
+    fn test_tree_string_type() {
         let num_leaves = 1000;
         let mut leaves = Vec::new();
         for i in 0..num_leaves {
-            leaves.push(i.to_string());
+            leaves.push(DynSolValue::String(i.to_string()));
         }
         let tree = StandardMerkleTree::of(leaves.clone());
 
         for leaf in leaves.iter() {
             let proof = tree.get_proof(leaf);
-            let bool = tree.verify_proof(leaf.to_string(), proof);
+            let bool = tree.verify_proof(leaf.clone(), proof);
+            assert!(bool);
+        }
+    }
+
+    #[test]
+    fn test_tree_bytes32_type() {
+        let mut leaves = Vec::new();
+
+        let leaf = DynSolValue::FixedBytes(
+            FixedBytes::<32>::from_hex(
+                "0x46296bc9cb11408bfa46c5c31a542f12242db2412ee2217b4e8add2bc1927d0b",
+            )
+            .unwrap(),
+            32,
+        );
+
+        leaves.push(leaf);
+
+        let tree = StandardMerkleTree::of(leaves.clone());
+
+        for leaf in leaves.iter() {
+            let proof = tree.get_proof(leaf);
+            let bool = tree.verify_proof(leaf.clone(), proof);
             assert!(bool);
         }
     }
