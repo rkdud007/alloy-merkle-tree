@@ -1,7 +1,6 @@
 [package]
 name = "alloy-merkle-tree"
 description = "Minimal Merkle Tree implementation"
-license = "Apache-2.0"
 readme = "README.md"
 license-file = "LICENSE"
 repository = "https://github.com/rkdud007/alloy-merkle-tree"
@@ -12,7 +11,6 @@ version = "0.5.0"
 edition = "2021"
 
 [dependencies]
-alloy-primitives = { version = "0.6.2", default-features = false }
-alloy-dyn-abi = { version = "0.6.2", default-features = false }
+alloy = { version = "0.1.1", features = ["dyn-abi"] }
 hashbrown = "0.14.3"
 anyhow = "1.0"

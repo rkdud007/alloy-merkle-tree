@@ -5,8 +5,8 @@ use crate::alloc::string::ToString;
 use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
-use alloy_dyn_abi::DynSolValue;
-use alloy_primitives::{keccak256, Keccak256, B256};
+use alloy::dyn_abi::DynSolValue;
+use alloy::primitives::{keccak256, Keccak256, B256};
 
 use hashbrown::HashMap;
 
@@ -216,8 +216,8 @@ mod test {
     use crate::alloc::string::ToString;
     use crate::standard_binary_tree::StandardMerkleTree;
     use alloc::vec::Vec;
-    use alloy_dyn_abi::DynSolValue;
-    use alloy_primitives::{hex::FromHex, FixedBytes};
+    use alloy::dyn_abi::DynSolValue;
+    use alloy::primitives::{hex::FromHex, FixedBytes};
 
     #[test]
     fn test_tree_string_type() {
