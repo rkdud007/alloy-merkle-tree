@@ -1,6 +1,8 @@
 //! This module contains the [StandardMerkleTree], an implementation of the standard Merkle Tree data structure
 //! Checkout [StandardMerkleTree](https://github.com/OpenZeppelin/merkle-tree) for more details.
 
+use core::panic;
+
 use crate::alloc::string::ToString;
 use alloc::string::String;
 use alloc::vec;
@@ -10,20 +12,17 @@ use alloy::primitives::{keccak256, Keccak256, B256};
 
 use hashbrown::HashMap;
 
+/// The error type for the [StandardMerkleTree].
 #[derive(Debug)]
 pub enum MerkleTreeError {
+    /// The tree is empty.
     LeafNotFound,
+    /// Invalid check.
     InvalidCheck,
+    /// The root hash have no siblings.
     RootHaveNoSiblings,
+    /// Leaf is not supported type.
     NotSupportedType,
-}
-
-#[derive(Debug)]
-pub struct MerkleProof {
-    pub leaf: B256,
-    pub siblings: Vec<B256>,
-    pub path_indices: Vec<usize>,
-    pub root: B256,
 }
 
 #[derive(Debug)]
@@ -42,11 +41,7 @@ impl StandardMerkleTree {
     pub fn new(tree: Vec<B256>, values: Vec<(&DynSolValue, usize)>) -> Self {
         let mut tree_values = HashMap::new();
         for (tree_key, tree_value) in values.into_iter() {
-            let tree_key_str = match &tree_key {
-                DynSolValue::String(inner_value) => inner_value.clone(),
-                DynSolValue::FixedBytes(inner_value, _) => inner_value.to_string(),
-                _ => panic!("Not supported value type for leaf"),
-            };
+            let tree_key_str = Self::check_valid_value_type(tree_key);
             tree_values.insert(tree_key_str, tree_value);
         }
         Self { tree, tree_values }
@@ -81,15 +76,11 @@ impl StandardMerkleTree {
     }
 
     pub fn get_proof(&self, value: &DynSolValue) -> Result<Vec<B256>, MerkleTreeError> {
-        let tree_key = match value {
-            DynSolValue::String(inner_value) => inner_value,
-            DynSolValue::FixedBytes(inner_value, _) => &inner_value.to_string(),
-            _ => return Err(MerkleTreeError::NotSupportedType),
-        };
+        let tree_key = Self::check_valid_value_type(value);
 
         let tree_index = self
             .tree_values
-            .get(tree_key)
+            .get(&tree_key)
             .ok_or(MerkleTreeError::LeafNotFound)?;
 
         make_proof(&self.tree, *tree_index)
@@ -103,6 +94,14 @@ impl StandardMerkleTree {
         let leaf_hash = self.get_leaf_hash(leaf);
         let implied_root = process_proof(leaf_hash, proof);
         self.tree[0] == implied_root
+    }
+
+    fn check_valid_value_type(value: &DynSolValue) -> String {
+        match value {
+            DynSolValue::String(inner_value) => inner_value.to_string(),
+            DynSolValue::FixedBytes(inner_value, _) => inner_value.to_string(),
+            _ => panic!("Not supported value type"),
+        }
     }
 }
 
