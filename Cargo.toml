@@ -5,7 +5,11 @@ readme = "README.md"
 license-file = "LICENSE"
 repository = "https://github.com/rkdud007/alloy-merkle-tree"
 keywords = ["merkle", "tree", "merkle-tree"]
-categories = ["cryptography", "data-structures", "blockchain"]
+categories = [
+    "cryptography",
+    "data-structures",
+    "cryptography::cryptocurrencies ",
+]
 exclude = [".github"]
 version = "0.7.0"
 edition = "2021"
