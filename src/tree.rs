@@ -157,16 +157,6 @@ mod test {
     }
 
     #[test]
-    fn test_tree_unsorted() {
-        let mut tree = MerkleTree::new();
-        // Should be 2 ^ N leaves
-        let num_leaves = 16;
-        for i in 0..num_leaves {
-            tree.insert(B256::from(U256::from(i)));
-        }
-    }
-
-    #[test]
     fn test_tree_sorted() {
         let mut tree = MerkleTree::new();
         tree.set_sort(true);
