@@ -12,6 +12,7 @@ pub struct MerkleProof {
 #[derive(Debug)]
 pub struct MerkleTree {
     leaves: Vec<B256>,
+    is_sort: bool,
     is_tree_ready: bool,
     layers: Vec<Vec<B256>>,
     depth: u64,
@@ -28,11 +29,20 @@ impl MerkleTree {
     pub fn new() -> Self {
         MerkleTree {
             leaves: Vec::new(),
+            is_sort: false,
             is_tree_ready: false,
             layers: Vec::new(),
             depth: 0,
             root: B256::default(),
         }
+    }
+
+    pub fn set_sort(&mut self, sort: bool) {
+        self.is_sort = sort;
+    }
+
+    pub fn is_sorted(&self) -> bool {
+        self.is_sort
     }
 
     pub fn insert(&mut self, leaf: B256) {
@@ -50,6 +60,12 @@ impl MerkleTree {
     pub fn finish(&mut self) {
         if self.is_tree_ready {
             return;
+        }
+
+        // Sort leaves if not sorted
+        if self.is_sort {
+            self.leaves.sort();
+            self.is_sort = true;
         }
 
         self.depth = 1;
@@ -136,6 +152,32 @@ mod test {
 
         for i in 0..num_leaves {
             let proof = tree.create_proof(&B256::from(U256::from(i))).unwrap();
+            assert!(MerkleTree::verify_proof(&proof));
+        }
+    }
+
+    #[test]
+    fn test_tree_sorted() {
+        let mut tree = MerkleTree::new();
+        tree.set_sort(true);
+
+        // Should be 2 ^ N leaves
+        let num_leaves = 16;
+        for i in (0..num_leaves).rev() {
+            tree.insert(B256::from(U256::from(i)));
+        }
+        tree.finish();
+
+        // Verify that the tree is sorted
+        assert!(tree.is_sorted());
+
+        // Check if the leaves are actually sorted
+        let sorted_leaves = tree.leaves.clone();
+        assert!(sorted_leaves.windows(2).all(|w| w[0] <= w[1]));
+
+        for i in 0..num_leaves {
+            let leaf = B256::from(U256::from(i));
+            let proof = tree.create_proof(&leaf).unwrap();
             assert!(MerkleTree::verify_proof(&proof));
         }
     }
