@@ -1,3 +1,26 @@
+//! This module contains the [MerkleTree], an implementation of a perfect binary Merkle tree.
+//!
+//! # Examples
+//!
+//! ```rust
+//! use alloy-merkle-tree::MerkleTree;
+//! use alloy::primitives::{B256, U256};
+//!
+//! let mut tree = MerkleTree::new();
+//! // Number of leaves should be a power of 2 for a perfect binary tree
+//! let num_leaves = 16;
+//! for i in 0..num_leaves {
+//!     tree.insert(B256::from(U256::from(i)));
+//! }
+//! tree.finish();
+//!
+//! for i in 0..num_leaves {
+//!     let proof = tree.create_proof(&B256::from(U256::from(i))).unwrap();
+//!     assert!(MerkleTree::verify_proof(&proof));
+//! }
+//! ```
+//!
+
 use alloc::vec::Vec;
 use alloy::primitives::{Keccak256, B256};
 
@@ -33,18 +56,14 @@ pub struct MerkleTree {
 }
 
 impl Default for MerkleTree {
-    /// Creates a new empty `MerkleTree` with default values.
+    /// Creates a new empty [`MerkleTree`] with default values.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl MerkleTree {
-    /// Creates a new empty `MerkleTree`.
-    ///
-    /// # Returns
-    ///
-    /// A new instance of `MerkleTree`.
+    /// Creates a new empty [`MerkleTree`].
     pub fn new() -> Self {
         MerkleTree {
             leaves: Vec::new(),
@@ -57,42 +76,21 @@ impl MerkleTree {
     }
 
     /// Sets whether the leaves should be sorted before tree construction.
-    ///
-    /// # Parameters
-    ///
-    /// - `sort`: A boolean indicating whether to sort the leaves.
     pub fn set_sort(&mut self, sort: bool) {
         self.is_sort = sort;
     }
 
     /// Checks if the leaves are set to be sorted.
-    ///
-    /// # Returns
-    ///
-    /// `true` if sorting is enabled; otherwise, `false`.
     pub fn is_sorted(&self) -> bool {
         self.is_sort
     }
 
     /// Inserts a new leaf into the Merkle tree.
-    ///
-    /// # Parameters
-    ///
-    /// - `leaf`: The hash value of the leaf to insert.
     pub fn insert(&mut self, leaf: B256) {
         self.leaves.push(leaf);
     }
 
     /// Hashes two nodes together using Keccak256.
-    ///
-    /// # Parameters
-    ///
-    /// - `left`: The left child hash.
-    /// - `right`: The right child hash.
-    ///
-    /// # Returns
-    ///
-    /// The resulting parent hash.
     fn hash(left: &B256, right: &B256) -> B256 {
         let mut hasher = Keccak256::new();
         hasher.update(left);
@@ -144,12 +142,6 @@ impl MerkleTree {
     }
 
     /// Generates a Merkle proof for a given leaf.
-    ///
-    /// # Parameters
-    ///
-    /// - `leaf`: The leaf hash for which to generate the proof.
-    ///
-    /// # Returns
     ///
     /// An `Option` containing the `MerkleProof` if the leaf is found, or `None` if not.
     pub fn create_proof(&self, leaf: &B256) -> Option<MerkleProof> {
@@ -216,7 +208,7 @@ mod test {
     use crate::tree::MerkleTree;
     use alloy::primitives::{B256, U256};
 
-    /// Tests the basic functionality of the `MerkleTree`.
+    /// Tests the basic functionality of the [`MerkleTree`].
     #[test]
     fn test_tree() {
         let mut tree = MerkleTree::new();
@@ -234,7 +226,7 @@ mod test {
         }
     }
 
-    /// Tests the `MerkleTree` with sorting enabled.
+    /// Tests the [`MerkleTree`] with sorting enabled.
     #[test]
     fn test_tree_sorted() {
         let mut tree = MerkleTree::new();
