@@ -1,5 +1,9 @@
 # alloy-merkle-tree
 
+![CI](https://img.shields.io/github/actions/workflow/status/rkdud007/alloy-merkle-tree/ci.yml?style=flat-square&logo=githubactions&logoColor=white&label=CI)
+[![Crates.io](https://img.shields.io/crates/v/alloy-merkle-tree?style=flat-square&logo=lootcrate)](https://crates.io/crates/alloy-merkle-tree)
+[![Documentation](https://img.shields.io/docsrs/alloy-merkle-tree)](https://docs.rs/alloy-merkle-tree)
+
 Minimal Merkle Tree implementation
 
 - various tree implementation
