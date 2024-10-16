@@ -11,10 +11,10 @@ categories = [
     "cryptography::cryptocurrencies",
 ]
 exclude = [".github"]
-version = "0.7.0"
+version = "0.7.1"
 edition = "2021"
 
 [dependencies]
-alloy = { version = "0.1.1", features = ["dyn-abi"] }
+alloy = { version = "0.4.2", features = ["dyn-abi"] }
 hashbrown = "0.14.3"
 anyhow = "1.0"

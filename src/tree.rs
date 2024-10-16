@@ -3,7 +3,7 @@
 //! # Examples
 //!
 //! ```rust
-//! use alloy-merkle-tree::MerkleTree;
+//! use alloy_merkle_tree::tree::MerkleTree;
 //! use alloy::primitives::{B256, U256};
 //!
 //! let mut tree = MerkleTree::new();
