@@ -5,7 +5,7 @@
 //! # Examples
 //!
 //! ```rust
-//! use alloy-merkle-tree::standard_binary_tree::StandardMerkleTree;
+//! use alloy_merkle_tree::standard_binary_tree::StandardMerkleTree;
 //! use alloy::dyn_abi::DynSolValue;
 //!
 //! let num_leaves = 1000;
