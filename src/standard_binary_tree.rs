@@ -76,11 +76,14 @@ impl StandardMerkleTree {
     /// Constructs a [`StandardMerkleTree`] from a slice of dynamic Solidity values.
     pub fn of(values: &[DynSolValue]) -> Self {
         // Hash each value and associate it with its index and leaf hash.
-        let hashed_values: Vec<(&DynSolValue, usize, B256)> = values
+        let mut hashed_values: Vec<(&DynSolValue, usize, B256)> = values
             .iter()
             .enumerate()
             .map(|(i, value)| (value, i, standard_leaf_hash(value)))
             .collect();
+
+        // Sort the hashed values by their hash.
+        hashed_values.sort_by(|(_, _, a), (_, _, b)| a.cmp(b));
 
         // Collect the leaf hashes into a vector.
         let hashed_values_hash = hashed_values
@@ -265,9 +268,11 @@ fn hash_pair(left: B256, right: B256) -> B256 {
 mod test {
     use crate::alloc::string::ToString;
     use crate::standard_binary_tree::StandardMerkleTree;
+    use alloc::string::String;
+    use alloc::vec;
     use alloc::vec::Vec;
     use alloy::dyn_abi::DynSolValue;
-    use alloy::primitives::{hex::FromHex, FixedBytes};
+    use alloy::primitives::{address, hex, hex::FromHex, U256, FixedBytes};
 
     /// Tests the [`StandardMerkleTree`] with string-type leaves.
     #[test]
@@ -308,5 +313,63 @@ mod test {
             let is_valid = tree.verify_proof(&leaf, proof);
             assert!(is_valid);
         }
+    }
+
+    /// Tests the [`StandardMerkleTree`] with a tuple leaves of hardhat addresses and amounts.
+    /// Equivalent to JS: const tree = StandardMerkleTree.of(values, ["address", "uint256"]);
+    fn test_hardhat_tuples() {
+        let mut leaves = Vec::new();
+
+        vec![
+            (
+                address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
+                U256::from(10000),
+            ),
+            (
+                address!("70997970C51812dc3A010C7d01b50e0d17dc79C8"),
+                U256::from(1000),
+            ),
+            (
+                address!("3c44cdddb6a900fa2b585dd299e03d12fa4293bc"),
+                U256::from(100),
+            ),
+            (
+                address!("90f79bf6eb2c4f870365e785982e1f101e93b906"),
+                U256::from(10),
+            ),
+            (
+                address!("15d34aaf54267db7d7c367839aaf71a00a2c6a65"),
+                U256::from(1),
+            ),
+        ]
+        .iter()
+        .for_each(|(address, amount)| {
+            leaves.push(unsafe {
+                DynSolValue::String(String::from_utf8_unchecked(
+                    DynSolValue::Tuple(vec![
+                        DynSolValue::Address(*address),
+                        DynSolValue::Uint(*amount, 256),
+                    ])
+                    .abi_encode(),
+                ))
+            });
+        });
+
+        let tree = StandardMerkleTree::of(&leaves);
+
+        assert_eq!(
+            tree.get_proof(&leaves.get(0).unwrap()).unwrap(),
+            vec![
+                hex!("8ee56d16226ff6684927054c33cd505c4eee1ebabbffe198460d00cb083aaebd"),
+                hex!("fa31eb8d65ff2307b7026df667a06a19aade0151ed701ed2307295ae4fa48364"),
+                hex!("f0768f444c5a27a6bb7c9203b0b5b147e501ff7b7784e0363e5751590962b034"),
+            ]
+        );
+
+        let root = tree.root();
+        assert_eq!(
+            root,
+            hex!("2b4b963c699c531f94ca8f8a0ef76c5d28f067d79927c035a44296190c2d8029")
+        );
     }
 }
