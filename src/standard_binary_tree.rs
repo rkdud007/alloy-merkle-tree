@@ -13,7 +13,7 @@
 //! for i in 0..num_leaves {
 //!     leaves.push(DynSolValue::String(i.to_string()));
 //! }
-//! let tree = StandardMerkleTree::of(&leaves);
+//! let tree = StandardMerkleTree::of_sorted(&leaves);
 //!
 //! for leaf in leaves.iter() {
 //!     let proof = tree.get_proof(leaf).unwrap();
@@ -73,8 +73,17 @@ impl StandardMerkleTree {
         Self { tree, tree_values }
     }
 
-    /// Constructs a [`StandardMerkleTree`] from a slice of dynamic Solidity values.
+
     pub fn of(values: &[DynSolValue]) -> Self {
+        Self::create(values, false)
+    }
+
+    pub fn of_sorted(values: &[DynSolValue]) -> Self {
+        Self::create(values, true)
+    }
+
+    /// Constructs a [`StandardMerkleTree`] from a slice of dynamic Solidity values.
+    fn create(values: &[DynSolValue], sort_leaves: bool) -> Self {
         // Hash each value and associate it with its index and leaf hash.
         let mut hashed_values: Vec<(&DynSolValue, usize, B256)> = values
             .iter()
@@ -83,8 +92,9 @@ impl StandardMerkleTree {
             .collect();
 
         // Sort the hashed values by their hash.
-        hashed_values.sort_by(|(_, _, a), (_, _, b)| a.cmp(b));
-
+        if sort_leaves {
+            hashed_values.sort_by(|(_, _, a), (_, _, b)| a.cmp(b));
+        }
         // Collect the leaf hashes into a vector.
         let hashed_values_hash = hashed_values
             .iter()
@@ -317,6 +327,7 @@ mod test {
 
     /// Tests the [`StandardMerkleTree`] with a tuple leaves of hardhat addresses and amounts.
     /// Equivalent to JS: const tree = StandardMerkleTree.of(values, ["address", "uint256"]);
+    #[test]
     fn test_hardhat_tuples() {
         let mut leaves = Vec::new();
 
@@ -355,7 +366,7 @@ mod test {
             });
         });
 
-        let tree = StandardMerkleTree::of(&leaves);
+        let tree = StandardMerkleTree::of_sorted(&leaves);
 
         assert_eq!(
             tree.get_proof(&leaves.get(0).unwrap()).unwrap(),
