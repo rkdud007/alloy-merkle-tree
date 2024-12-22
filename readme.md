@@ -67,7 +67,7 @@ let mut leaves = Vec::new();
 for i in 0..num_leaves {
     leaves.push(i.to_string());
 }
-let tree = StandardMerkleTree::of(leaves.clone());
+let tree = StandardMerkleTree::of_sorted(leaves.clone());
 
 for leaf in leaves.iter() {
     let proof = tree.get_proof(leaf);
