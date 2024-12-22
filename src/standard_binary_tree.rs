@@ -73,7 +73,6 @@ impl StandardMerkleTree {
         Self { tree, tree_values }
     }
 
-
     pub fn of(values: &[DynSolValue]) -> Self {
         Self::create(values, false)
     }
@@ -282,7 +281,7 @@ mod test {
     use alloc::vec;
     use alloc::vec::Vec;
     use alloy::dyn_abi::DynSolValue;
-    use alloy::primitives::{address, hex, hex::FromHex, U256, FixedBytes};
+    use alloy::primitives::{address, hex, hex::FromHex, FixedBytes, U256};
 
     /// Tests the [`StandardMerkleTree`] with string-type leaves.
     #[test]
@@ -371,7 +370,8 @@ mod test {
         let proof = tree.get_proof(leaves.first().unwrap()).unwrap();
         let is_valid = tree.verify_proof(leaves.first().unwrap(), proof.clone());
         assert!(is_valid);
-        assert_eq!(proof,
+        assert_eq!(
+            proof,
             vec![
                 hex!("8ee56d16226ff6684927054c33cd505c4eee1ebabbffe198460d00cb083aaebd"),
                 hex!("fa31eb8d65ff2307b7026df667a06a19aade0151ed701ed2307295ae4fa48364"),
