@@ -368,8 +368,10 @@ mod test {
 
         let tree = StandardMerkleTree::of_sorted(&leaves);
 
-        assert_eq!(
-            tree.get_proof(&leaves.get(0).unwrap()).unwrap(),
+        let proof = tree.get_proof(leaves.first().unwrap()).unwrap();
+        let is_valid = tree.verify_proof(leaves.first().unwrap(), proof.clone());
+        assert!(is_valid);
+        assert_eq!(proof,
             vec![
                 hex!("8ee56d16226ff6684927054c33cd505c4eee1ebabbffe198460d00cb083aaebd"),
                 hex!("fa31eb8d65ff2307b7026df667a06a19aade0151ed701ed2307295ae4fa48364"),
