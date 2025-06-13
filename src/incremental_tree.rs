@@ -2,7 +2,7 @@
 //! used in the [ETH2 Deposit Contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa).
 
 use alloc::{vec, vec::Vec};
-use alloy::primitives::{keccak256, B256};
+use alloy_primitives::{keccak256, B256};
 
 /// The error type for the [IncrementalMerkleTree].
 #[derive(Debug)]
@@ -208,7 +208,7 @@ impl<const HEIGHT: usize> IncrementalMerkleTree<HEIGHT> {
 #[cfg(test)]
 mod test {
     use super::IncrementalMerkleTree;
-    use alloy::primitives::{keccak256, B256};
+    use alloy_primitives::{keccak256, B256};
 
     #[test]
     fn test_static_tree_root() {
