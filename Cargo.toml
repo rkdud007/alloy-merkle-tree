@@ -15,6 +15,7 @@ version = "0.7.3"
 edition = "2021"
 
 [dependencies]
-alloy = { version = "1.0", features = ["dyn-abi"] }
+alloy-primitives = "1.2"
+alloy-dyn-abi = "1.2"
 hashbrown = "0.15.3"
 anyhow = "1.0"
