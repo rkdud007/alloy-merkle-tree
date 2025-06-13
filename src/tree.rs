@@ -146,10 +146,7 @@ impl MerkleTree {
     /// An `Option` containing the `MerkleProof` if the leaf is found, or `None` if not.
     pub fn create_proof(&self, leaf: &B256) -> Option<MerkleProof> {
         // Find the index of the leaf in the list of leaves
-        let mut index = match self.leaves.iter().position(|x| x == leaf) {
-            Some(index) => index,
-            None => return None, // Leaf not found
-        };
+        let mut index = self.leaves.iter().position(|x| x == leaf)?;
 
         let mut proof = MerkleProof {
             leaf: *leaf,
