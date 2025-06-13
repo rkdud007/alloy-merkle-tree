@@ -6,7 +6,7 @@
 //!
 //! ```rust
 //! use alloy_merkle_tree::standard_binary_tree::StandardMerkleTree;
-//! use alloy::dyn_abi::DynSolValue;
+//! use alloy_dyn_abi::DynSolValue;
 //!
 //! let num_leaves = 1000;
 //! let mut leaves = Vec::new();
@@ -28,8 +28,8 @@ use crate::alloc::string::ToString;
 use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
-use alloy::dyn_abi::DynSolValue;
-use alloy::primitives::{keccak256, Keccak256, B256};
+use alloy_dyn_abi::DynSolValue;
+use alloy_primitives::{keccak256, Keccak256, B256};
 
 use hashbrown::HashMap;
 
@@ -280,8 +280,8 @@ mod test {
     use alloc::string::String;
     use alloc::vec;
     use alloc::vec::Vec;
-    use alloy::dyn_abi::DynSolValue;
-    use alloy::primitives::{address, hex, hex::FromHex, FixedBytes, U256};
+    use alloy_dyn_abi::DynSolValue;
+    use alloy_primitives::{address, hex, hex::FromHex, FixedBytes, U256};
 
     /// Tests the [`StandardMerkleTree`] with string-type leaves.
     #[test]
